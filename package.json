@@ -6,11 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WAScottV/microservice-kit.git"
+  },
   "author": "Strategic Machines",
   "license": "ISC",
-  "devDependencies": {
-    "nodemon": "^1.18.2"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@xmachina/message": "^1.0.8",
     "contentful": "^6.1.1"
