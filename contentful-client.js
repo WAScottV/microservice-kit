@@ -1,9 +1,12 @@
-require('dotenv').load();
 const contentful = require('contentful');
 
+const create = (spaceId, accessToken) => {
+  contentful.createClient({
+    space: spaceId,
+    environment: 'master',
+    accessToken: accessToken
+  });
+};
+
 // initialize contenful client.
-module.exports = contentful.createClient({
-  space: process.env.SPACE_ID,
-  environment: 'master',
-  accessToken: process.env.CMA_ACCESS_TOKEN
-});
+module.exports.createClient = create;

@@ -1,31 +1,35 @@
 const { createMachine } = require('@xmachina/message');
-const client = require('./contentful-client');
+const contentful = require('./contentful-client');
 const http = require('http');
 const { PORT = 3000 } = process.env;
 
-const main = (cb) => {
-    http.createServer(async (req, res) => {
-        let body = '';
+let client;
+
+const main = (cb, spaceId, accessToken) => {
+  // initialize Contenful client.
+  client = contentful.createClient(spaceId, accessToken);
+  http.createServer(async (req, res) => {
+      let body = '';
+    
+      req.on('data', (data) => {
+        body += data;
+      });
+    
+      req.on('end', async () => {
+        try {
+          const reply = await processRequest(JSON.parse(body));
+          res.writeHead(200, {'Content-Type': 'application/json'});
+          res.write(JSON.stringify(reply));
+        } catch (error) {
+          console.log(error);
+          res.writeHead(500, {'Content-Type': 'application/json'});
+          res.write(JSON.stringify(error));
+        }
+        cb();
+        res.end();
+      });
       
-        req.on('data', (data) => {
-          body += data;
-        });
-      
-        req.on('end', async () => {
-          try {
-            const reply = await processRequest(JSON.parse(body));
-            res.writeHead(200, {'Content-Type': 'application/json'});
-            res.write(JSON.stringify(reply));
-          } catch (error) {
-            console.log(error);
-            res.writeHead(500, {'Content-Type': 'application/json'});
-            res.write(JSON.stringify(error));
-          }
-          cb();
-          res.end();
-        });
-        
-      }).listen(PORT);
+  }).listen(PORT);
 };
 
 const processRequest = async (obj) => {
@@ -57,10 +61,6 @@ const processRequest = async (obj) => {
     }
   });
 }
-
-const setDataObjectProps = () => {
-
-};
 
 const getMessageArray = async (args, cb) => {
   const msgArray = [];
@@ -105,6 +105,4 @@ const getRandomInt = (max) => {
   return Math.floor(Math.random() * (max + 1));
 };
 
-module.exports = {
-    main: main
-};
+exports.startServer = main;
