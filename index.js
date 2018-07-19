@@ -1,6 +1,7 @@
 const { createMachine } = require('@xmachina/message');
 const contentful = require('./contentful-client');
 const http = require('http');
+
 const { PORT = 3000 } = process.env;
 
 const main = (cb, spaceId, accessToken, contentType) => {
@@ -15,6 +16,8 @@ const main = (cb, spaceId, accessToken, contentType) => {
     
       req.on('end', async () => {
         try {
+          console.log('in end event emitter.');
+
           const reply = await processRequest(JSON.parse(body));
           res.writeHead(200, {'Content-Type': 'application/json'});
           res.write(JSON.stringify(reply));
@@ -30,40 +33,31 @@ const main = (cb, spaceId, accessToken, contentType) => {
   }).listen(PORT);
 
   const processRequest = async (obj) => {
-    return new Promise (function(resolve, reject) {
-      try {
-        let result = {};
-    
-        // initialize object for interrogating input.
-        const machine = createMachine();
-        machine.updateWorkObj(obj);
-    
-        // grab a copy of the validated data object
-        const args = machine.getWorkObj();
-    
-        // begin to construct the response object
-        result.sender = args.message.From;
-        result.orgmessage = args;
-        result.reply = [];
-    
-        //retrieve data for reply array of message object.
-        getMessageArray(args, (response) => {
-          result.reply = response.slice();
-          machine.setResponse(result);
-          let newObj = machine.getWorkObj();
-          resolve(newObj);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
+    let result = {};
+    // initialize object for interrogating input.
+    const machine = createMachine();
+    machine.updateWorkObj(obj);
+
+    // grab a copy of the validated data object
+    const args = machine.getWorkObj();
+
+    // begin to construct the response object
+    result.sender = args.message.From;
+    result.orgmessage = args;
+    result.reply = [];
+
+    //retrieve data for reply array of message object.
+    const response = await getMessageArray(args);
+    result.reply = response.slice();
+    machine.setResponse(result);
+    return machine.getWorkObj();
   }
   
-  const getMessageArray = async (args, cb) => {
+  const getMessageArray = async args => {
     const msgArray = [];
     const topic = args.classifier.topclass.toLowerCase();
   
-    const chooseObjectProperities = (obj) => {
+    const chooseObjectProperities = obj => {
       for (let property in obj) {
         if (obj instanceof Array) {
           msgArray.push({msg: obj[getRandomInt(obj.length - 1)]});
@@ -80,7 +74,6 @@ const main = (cb, spaceId, accessToken, contentType) => {
     // call contenful cms to retrieve predefined content.
     const response = await contentful.getEntries(contentType);
   
-    // TODO: come up with way of determining name of topic property dynamically
     // filter response by the topic provided.
     const queryResult = response.items.filter(r => r.fields.topic === topic);
     if (queryResult.length === 0) {
@@ -91,7 +84,7 @@ const main = (cb, spaceId, accessToken, contentType) => {
       delete fields.topic;
       chooseObjectProperities(fields);   
     }
-    cb(msgArray);
+    return msgArray;
   };
   
   // Retrieve random number from 0 to max.
