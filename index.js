@@ -3,7 +3,7 @@ const contentful = require('./contentful-client');
 const http = require('http');
 const { PORT = 3000 } = process.env;
 
-const main = (cb, spaceId, accessToken) => {
+const main = (cb, spaceId, accessToken, contentType) => {
   // initialize Contenful client.
   contentful.createClient(spaceId, accessToken);
   http.createServer(async (req, res) => {
@@ -78,7 +78,7 @@ const main = (cb, spaceId, accessToken) => {
     };
   
     // call contenful cms to retrieve predefined content.
-    const response = await contentful.getEntries();
+    const response = await contentful.getEntries(contentType);
   
     // TODO: come up with way of determining name of topic property dynamically
     // filter response by the topic provided.
@@ -100,4 +100,4 @@ const main = (cb, spaceId, accessToken) => {
   };
 };
 
-exports.startServer = main;
+module.exports.startServer = main;

@@ -9,12 +9,12 @@ const create = (spaceId, accessToken) => {
   });
 };
 
-const getEntries = async () => {
+const getEntries = async (contentType) => {
   if (client === null) {
     throw new Error('Must create client first');
   }
   return await client.getEntries({
-    content_type: 'message',
+    content_type: contentType,
     select: 'sys.id,fields'
   });
 }
