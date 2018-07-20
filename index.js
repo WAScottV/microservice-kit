@@ -16,8 +16,6 @@ const main = (cb, spaceId, accessToken, contentType) => {
     
       req.on('end', async () => {
         try {
-          console.log('in end event emitter.');
-
           const reply = await processRequest(JSON.parse(body));
           res.writeHead(200, {'Content-Type': 'application/json'});
           res.write(JSON.stringify(reply));
