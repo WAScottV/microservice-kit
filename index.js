@@ -43,6 +43,10 @@ const main = (cb, spaceId, accessToken, contentType) => {
     result.sender = args.message.From;
     result.orgmessage = args;
     result.reply = [];
+    
+    /* TEMPORARY FOR TESTING PURPOSES*/
+    result.machine = 'http://localhost:3001';
+    /* TEMPORARY FOR TESTING PURPOSES*/
 
     //retrieve data for reply array of message object.
     const response = await getMessageArray(args);
