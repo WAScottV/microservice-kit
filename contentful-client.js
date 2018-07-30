@@ -19,6 +19,5 @@ const getEntries = async (contentType) => {
   });
 }
 
-// initialize contenful client.
 module.exports.createClient = create;
 module.exports.getEntries = getEntries;
